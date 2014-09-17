@@ -1,4 +1,7 @@
 #!/usr/bin/env python2.7
+#
+# Giving the name of a process, writes down every second information about memory and cpu for that process
+# 
 
 import os
 import sys
