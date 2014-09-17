@@ -107,17 +107,17 @@ def writecsv(procs, procs_status,csvfile):
         if p.dict['cpu_percent'] is None:
             p.dict['cpu_percent'] = ''
         line = (
-               int(time.time()) - now,
-               p.dict['name'] or '',
-               p.pid,
-               ctime,
-               p.dict['nice'],
-               bytes2human(getattr(p.dict['memory_info'], 'vms', 0)),
-               bytes2human(getattr(p.dict['memory_info'], 'rss', 0)),
-               bytes2human(getattr(p.dict['memory_info'], 'shared', 0)),
-               bytes2human(getattr(p.dict['memory_info'], 'text', 0)),
-               p.dict['cpu_percent'],
-               p.dict['memory_percent'],
+               int(time.time()) - now,                                    # Iteration number
+               p.dict['name'] or '',                                      # Name of the process
+               p.pid,                                                     # PID
+               ctime,                                                     # CPU Time
+               # p.dict['nice'],		                          ## Nice status
+               bytes2human(getattr(p.dict['memory_info'], 'vms', 0)),     # Virtual memory
+               bytes2human(getattr(p.dict['memory_info'], 'rss', 0)),     # RSS Memory
+               bytes2human(getattr(p.dict['memory_info'], 'shared', 0)),  # Shared Memory
+               bytes2human(getattr(p.dict['memory_info'], 'text', 0)),    # Text memory
+               p.dict['cpu_percent'],		                          # CPU usage
+               p.dict['memory_percent'],	                          # Memory usage
         )
         if csvfile != "__no_output_just_verbose":
             with open(csvfile, 'ab') as f:
