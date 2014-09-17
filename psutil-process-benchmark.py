@@ -9,6 +9,7 @@ if os.name != 'posix':
 
 import time
 from datetime import datetime, timedelta
+now = int(time.time())
 
 def bytes2human(n):
     """
@@ -67,7 +68,7 @@ def writecsv(procs, procs_status):
         if p.dict['cpu_percent'] is None:
             p.dict['cpu_percent'] = ''
         line = (
-        int(time.time()),
+        int(time.time()) - now,
         p.dict['name'] or '',
         p.pid,
         ctime,
