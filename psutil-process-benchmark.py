@@ -17,6 +17,14 @@ from optparse import OptionParser
 
 now = int(time.time())
 
+def is_empty(any_structure):
+    if any_structure:
+        #print('Structure is not empty.')
+        return False
+    else:
+        #print('Structure is empty.')
+        return True
+    
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -84,48 +92,72 @@ def poll(interval, pname, csvfile):
                 pass
             else:
                 procs.append(p)
-    
+        elif pname == "header":
+            return ([], {}, csvfile)
     # return processes sorted by PID
     processes = sorted(procs, key=lambda p: p.dict['pid'], reverse=False)
     return (processes, procs_status, csvfile)
 
 
 def writecsv(procs, procs_status,csvfile):
-    import csv
-    for p in procs:
-        if p.dict['cpu_times'] is not None:
-            ctime = timedelta(seconds=sum(p.dict['cpu_times']))
-            ctime = "%s:%s.%s" % (ctime.seconds // 60 % 60,
-            str((ctime.seconds % 60)).zfill(2),
-            str(ctime.microseconds)[:2])
-        else:
-            ctime = ''
-        if p.dict['memory_percent'] is not None:
-            p.dict['memory_percent'] = round(p.dict['memory_percent'], 1)
-        else:
-            p.dict['memory_percent'] = ''
-        if p.dict['cpu_percent'] is None:
-            p.dict['cpu_percent'] = ''
+    # If procs is not set, it must be a header
+    if is_empty(procs):
         line = (
-               int(time.time()) - now,                                    # Iteration number
-               p.dict['name'] or '',                                      # Name of the process
-               p.pid,                                                     # PID
-               ctime,                                                     # CPU Time
-               # p.dict['nice'],		                          ## Nice status
-               bytes2human(getattr(p.dict['memory_info'], 'vms', 0)),     # Virtual memory
-               bytes2human(getattr(p.dict['memory_info'], 'rss', 0)),     # RSS Memory
-               bytes2human(getattr(p.dict['memory_info'], 'shared', 0)),  # Shared Memory
-               bytes2human(getattr(p.dict['memory_info'], 'text', 0)),    # Text memory
-               p.dict['cpu_percent'],		                          # CPU usage
-               p.dict['memory_percent'],	                          # Memory usage
+                "num",
+                "proc",
+                "pid",
+                "ctime",
+                #"nice",
+                "vms",
+                "rss",
+                "shared",
+                "text",
+                "cpu%",
+                "mem%"
         )
         if csvfile != "__no_output_just_verbose":
-            with open(csvfile, 'ab') as f:
+            with open(csvfile, 'a') as f:
                 writer = csv.writer(f)
                 writer.writerows([line])
             f.close
         else:
             print line
+    # Normal data
+    else:
+        for p in procs:
+            if p.dict['cpu_times'] is not None:
+                ctime = timedelta(seconds=sum(p.dict['cpu_times']))
+                ctime = "%s:%s.%s" % (ctime.seconds // 60 % 60,
+                str((ctime.seconds % 60)).zfill(2),
+                str(ctime.microseconds)[:2])
+            else:
+                ctime = ''
+            if p.dict['memory_percent'] is not None:
+                p.dict['memory_percent'] = round(p.dict['memory_percent'], 1)
+            else:
+                p.dict['memory_percent'] = ''
+            if p.dict['cpu_percent'] is None:
+                p.dict['cpu_percent'] = ''
+            line = (
+                    int(time.time()) - now,                                    # Iteration number
+                    p.dict['name'] or '',                                      # Name of the process
+                    p.pid,                                                     # PID
+                    ctime,                                                     # CPU Time
+                    # p.dict['nice'],		                               ## Nice status
+                    bytes2human(getattr(p.dict['memory_info'], 'vms', 0)),     # Virtual memory
+                    bytes2human(getattr(p.dict['memory_info'], 'rss', 0)),     # RSS Memory
+                    bytes2human(getattr(p.dict['memory_info'], 'shared', 0)),  # Shared Memory
+                    bytes2human(getattr(p.dict['memory_info'], 'text', 0)),    # Text memory
+                    p.dict['cpu_percent'],		                       # CPU usage
+                    p.dict['memory_percent'],	                               # Memory usage
+            )
+            if csvfile != "__no_output_just_verbose":
+                with open(csvfile, 'ab') as f:
+                    writer = csv.writer(f)
+                    writer.writerows([line])
+                f.close
+            else:
+                print line
 
             
 #Main
@@ -157,18 +189,17 @@ def main():
         else:
             if os.path.isfile(csvfile):
                 if query_yes_no ("File " + csvfile + " already exists. Overwrite?"):
-                    f = open(csvfile , 'w')
-                    f.write("\n")
-                    f.close
+                    os.remove(csvfile)
             print "Writing CSV file into " + csvfile
             print " ...press CTRL + C to stop..."
             
-        interval = 0
         now = int(time.time())
+        interval = 0.1
+        args = poll(interval, "header", csvfile)
         while 1:
-            args = poll(interval, pname, csvfile)
             writecsv(*args)
             interval = 1
+            args = poll(interval, pname, csvfile)
     except (KeyboardInterrupt, SystemExit):
         print "\nFinished."
         pass
