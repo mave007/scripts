@@ -1,7 +1,9 @@
 #!/usr/bin/env python2.7
 #
-# Giving the name of a process, writes down every second information about memory and cpu for that process
-# 
+# Giving the name of a process, writes down every 1 second information about memory and cpu for that process
+#
+# Based on top.py example from giampaolo
+# https://github.com/giampaolo/psutil/blob/master/examples/top.py
 
 import os
 import sys
@@ -9,10 +11,12 @@ import csv
 import psutil
 if os.name != 'posix':
         sys.exit('platform not supported')
-
 import time
 from datetime import datetime, timedelta
+from optparse import OptionParser
+
 now = int(time.time())
+
 
 def bytes2human(n):
     """
@@ -32,7 +36,7 @@ def bytes2human(n):
             return '%s%s' % (value, s)
     return "%sB" % n
 
-def poll(interval, pname):
+def poll(interval, pname, csvfile):
     # sleep some time
     time.sleep(interval)
     procs = []
@@ -52,16 +56,17 @@ def poll(interval, pname):
     
     # return processes sorted by PID
     processes = sorted(procs, key=lambda p: p.dict['pid'], reverse=False)
-    return (processes, procs_status)
+    return (processes, procs_status, csvfile)
 
 
-def writecsv(procs, procs_status):
+def writecsv(procs, procs_status,csvfile):
+    import csv
     for p in procs:
         if p.dict['cpu_times'] is not None:
             ctime = timedelta(seconds=sum(p.dict['cpu_times']))
             ctime = "%s:%s.%s" % (ctime.seconds // 60 % 60,
-                                  str((ctime.seconds % 60)).zfill(2),
-                                  str(ctime.microseconds)[:2])
+            str((ctime.seconds % 60)).zfill(2),
+            str(ctime.microseconds)[:2])
         else:
             ctime = ''
         if p.dict['memory_percent'] is not None:
@@ -71,30 +76,66 @@ def writecsv(procs, procs_status):
         if p.dict['cpu_percent'] is None:
             p.dict['cpu_percent'] = ''
         line = (
-        int(time.time()) - now,
-        p.dict['name'] or '',
-        p.pid,
-        ctime,
-        p.dict['nice'],
-        bytes2human(getattr(p.dict['memory_info'], 'vms', 0)),
-        bytes2human(getattr(p.dict['memory_info'], 'rss', 0)),
-        bytes2human(getattr(p.dict['memory_info'], 'shared', 0)),
-        bytes2human(getattr(p.dict['memory_info'], 'text', 0)),
-        p.dict['cpu_percent'],
-        p.dict['memory_percent'],
-        
+               int(time.time()) - now,
+               p.dict['name'] or '',
+               p.pid,
+               ctime,
+               p.dict['nice'],
+               bytes2human(getattr(p.dict['memory_info'], 'vms', 0)),
+               bytes2human(getattr(p.dict['memory_info'], 'rss', 0)),
+               bytes2human(getattr(p.dict['memory_info'], 'shared', 0)),
+               bytes2human(getattr(p.dict['memory_info'], 'text', 0)),
+               p.dict['cpu_percent'],
+               p.dict['memory_percent'],
         )
-        #try:
-        print(line)
-        #except
+        if csvfile != "__no_output_just_verbose":
+            with open(csvfile, 'ab') as f:
+                writer = csv.writer(f)
+                writer.writerows([line])
+            f.close
+        else:
+            print line
 
+            
 #Main
-try:
-    interval = 0
-    pname = sys.argv[1]
-    while 1:
-        args = poll(interval, pname)
-        writecsv(*args)
-        interval = 1
-except (KeyboardInterrupt, SystemExit):
-    pass
+def main():
+    try:
+        interval = 0
+        
+        parser = OptionParser(usage="usage: %prog [-o filename] [-v] process_name", version="%prog 1.0")
+        parser.add_option("-o", "--output",
+                          action="store", # optional because action defaults to "store"
+                          dest="filename",
+                          default="output.csv",
+                          metavar="FILE",
+                          help="CSV file to save the output (default: output.csv)"
+                          )
+        parser.add_option("-v", "--verbose",
+                          action="store_true",
+                          dest="verbose",
+                          help="Show output instead of writing CSV")
+        
+        (options, args) = parser.parse_args()
+        
+        if len(args) != 1:
+            parser.error("Wrong number of arguments")
+        
+        pname = args[0]
+        csvfile = options.filename
+        if options.verbose == True:
+            csvfile="__no_output_just_verbose"
+        else:
+            print "Writing CSV file into " + csvfile
+            print " ...press CTRL + C to stop..."
+        
+        while 1:
+            args = poll(interval, pname, csvfile)
+            writecsv(*args)
+            interval = 1
+    except (KeyboardInterrupt, SystemExit):
+        print "\nFinished."
+        pass
+    
+
+if __name__ == '__main__':
+    main()
