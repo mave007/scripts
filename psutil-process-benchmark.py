@@ -163,7 +163,7 @@ def writecsv(procs, procs_status,csvfile):
 #Main
 def main():
     try:        
-        parser = OptionParser(usage="usage: %prog [-o filename] [-v] process_name", version="%prog 1.0")
+        parser = OptionParser(usage="usage: %prog [-o filename] [-n num] [-v] process_name", version="%prog 1.0")
         parser.add_option("-o", "--output",
                           action="store", # optional because action defaults to "store"
                           dest="filename",
@@ -175,6 +175,10 @@ def main():
                           action="store_true",
                           dest="verbose",
                           help="Show output instead of writing CSV")
+        parser.add_option("-n", 
+                          action="store",
+                          dest="iterations",
+                          help="Number of seconds to record")
         
         (options, args) = parser.parse_args()
         
@@ -183,6 +187,7 @@ def main():
         
         pname = args[0]
         csvfile = options.filename
+        seconds = int(options.iterations)
         
         if options.verbose == True:
             csvfile="__no_output_just_verbose"
@@ -194,12 +199,16 @@ def main():
             print " ...press CTRL + C to stop..."
             
         now = int(time.time())
+        cont = 0
         interval = 0.1
         args = poll(interval, "header", csvfile)
         while 1:
             writecsv(*args)
             interval = 1
             args = poll(interval, pname, csvfile)
+            cont = cont + 1
+            if cont > seconds:
+                sys.exit(0)
     except (KeyboardInterrupt, SystemExit):
         print "\nFinished."
         pass
