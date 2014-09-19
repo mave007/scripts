@@ -162,7 +162,8 @@ def writecsv(procs, procs_status,csvfile):
             
 #Main
 def main():
-    try:        
+    try:
+        # We process the options and flags given from the command line
         parser = OptionParser(usage="usage: %prog [-o filename] [-n num] [-v] process_name", version="%prog 1.0")
         parser.add_option("-o", "--output",
                           action="store", # optional because action defaults to "store"
