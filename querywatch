@@ -1,0 +1,99 @@
+#!/usr/bin/perl -wT
+#
+# querywatch - Match BIND A query log for keyword, with log sampling
+#
+# 2004-09-17,jtk: initial public release
+# 2005-01-11,jtk: removed Net::IP::Watch module, didn't work in eval
+#                 changed sampling to sample 1000 A RRs, not all logs
+# 2005-01-14,jtk: added cli option for sample interval, minor edits
+# 2005-01-18,jtk: added gillsr improvements, including express option
+#
+$|=1;
+use strict;
+
+use Getopt::Long;
+
+my $result = 0;     # GetOptions return code
+my $config = "";    # config file
+my $express = "";   # express matching algorithm (exact match only)
+my %list = ();      # string list to match on
+my $string = "";    # temporary variable containing current string
+my $sample = 1000;  # default sampling rate, 1=sampling disabled
+my $loop = $sample; # generic loop counter
+
+$result = GetOptions( "c=s"     => \$config,
+                      "i=i"     => \$sample,
+                      "express" => \$express
+                    );
+
+if(!$config) { usage(); }    # missing config file
+if($sample < 1) { usage(); } # invalid sample rate
+
+init_list();      # get string list
+
+if($express) {    # express matching enabled - query must match exactly
+
+    # pre-process - only get valid A queries
+    my $regex_a = qr/IN A$/;   # quickly skip non A RR quries
+    my $regex_b = qr/ named\[\d+\]: client \d+\.\d+\.\d+\.\d+#\d+: query: (\S+) IN A$/;
+
+    my $query = "";  # (\S+) in $regex_b
+
+    while(defined (my $line=<>)) {
+        next if ($loop++ % $sample);     # is $loop modulo $sample > 0?
+        next if $line !~ /$regex_a/;     # quickly skip non A RR queries
+        next if $line !~ /$regex_b/;     # additional A RR quick, get query into $1
+        $query = lc($1);                 # convert query to lower case
+        print $line if ($list{$query});  # if query matches config name, print
+    }
+
+} else {          # express matching disabled - query contains match
+
+    my @list_regex = map { qr/$_/i } keys %list;  # compile regex
+
+    # (\S+) in pre-process regex below
+    my $query = "";
+
+    my $code = 'while(defined(my $line = <>)) {';
+
+    # sampling routine - skip over $sample # of lines
+    $code .= 'next if ($loop++ % $sample);';
+
+    # pre-process - only get valid A queries
+    $code .= 'next if $line !~ m/IN A$/o;';  # quickly skip non A RR queries
+    $code .= 'next if $line !~ m/ named\[\d+\]: client \d+\.\d+\.\d+\.\d+#\d+: query: (\S+) IN A$/o;';
+
+    # (\S+) in previous regex
+    $code .= '$query = lc($1);';
+
+    for $string (@list_regex) {             # for each string in config file
+        $code .= "\tif (\$query =~ /\\b$string\\b/) { print \$line; next; }\n";
+    }
+
+    $code .= '}';
+
+    # we use an eval for maximum matching speed, see See Perl Cookbook 6.10
+    eval $code;
+}
+
+# incorrect command line parameters
+sub usage {
+    print STDERR "  Usage: $0 -c configfile [-i sample_interval] [ -express]\n";
+    exit(1);
+}
+
+sub init_list{
+    open(FILE, $config ) || die "Can't open $config: $!\n";
+    while(defined ($string = <FILE>)) {
+        chomp $string;
+        # skip blank lines or comments
+        if ($string =~ /^\s*(#.*)?$/) { next; }
+        # remove leading/trailing space and inline comments
+        $string =~ s/^\s*([^#]*)\s*#*.*$/$1/;
+        # convert string to lower case
+        $string = lc($string);
+        # build hash list - eliminates exact match duplicates
+        $list{$string} = 1;
+    }
+    close(FILE);
+}
