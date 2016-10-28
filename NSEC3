@@ -1,0 +1,9 @@
+#!/bin/sh
+# NSEC3 wrapper around nsec3hash
+
+algo=$1
+flags=$2
+iters=$3
+salt=$4
+domain=$5
+nsec3hash $salt $algo $iters $domain
