@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Print latest file modifications
+# Receives 1 parameter (number) to see latest commits
+#
+
+if [ -z $1 ] ; then
+   NUM=5
+elif [ $1 -gt 0 ] ; then
+   NUM=$1
+else
+   echo "Error: $0 needs a number (int) as parameter"
+   exit 1
+fi
+
+git status -b -s 2>/dev/null || ( echo "Error: ${PWD} not a git repo" && exit 1 )
+revlist=$(git rev-list -${NUM} HEAD)
+for rev in ${revlist} ; do
+	git log -1 --decorate --pretty=oneline --abbrev-commit --date=short --pretty=format:"%C(auto)%h%x09%ad%x09%s (%aN <%aE>)" ${rev}
+	git log -1 --pretty="format:" --name-status ${rev}
+done
+	
