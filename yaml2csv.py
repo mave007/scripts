@@ -4,7 +4,6 @@ import yaml
 import yamlordereddictloader
 import sys
 
-
 KEY=""
 VALUE=""
 with open(sys.argv[1], 'r') as stream:
