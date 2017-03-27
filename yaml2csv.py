@@ -15,11 +15,11 @@ with open(sys.argv[1], 'r') as stream:
 			elif str(k) == 'end-period':
 				continue
 			elif str(k) == 'start-period':
-				KEY = KEY + str(k) + ","
-				VALUE = VALUE + str(v)[0:10] + ","
+				KEY = KEY + str(k) + ";"
+				VALUE = VALUE + str(v)[0:10] + ";"
 			else:
-				KEY = KEY + str(k) + ","
-				VALUE = VALUE + str(v) + ","
+				KEY = KEY + str(k) + ";"
+				VALUE = VALUE + str(v) + ";"
 			
 print KEY[:-1]
 print VALUE[:-1]
