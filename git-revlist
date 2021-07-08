@@ -16,7 +16,7 @@ fi
 git status -b -s 2>/dev/null || ( echo "Error: ${PWD} not a git repo" && exit 1 )
 revlist=$(git rev-list -${NUM} HEAD)
 for rev in ${revlist} ; do
-	git log -1 --decorate --pretty=oneline --abbrev-commit --date=short --pretty=format:"%C(auto)%h%x09%ad%x09%s (%aN <%aE>)" ${rev}
+	git log -1 --decorate --pretty=oneline --abbrev-commit --date=local --pretty=format:"%C(auto)%h%x09%cd%x09%x09%s (%aN <%aE>)" ${rev}
 	git log -1 --pretty="format:" --name-status ${rev}
 done
 	
