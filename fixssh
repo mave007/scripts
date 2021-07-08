@@ -1,5 +1,13 @@
 #!/bin/bash
+#
+# If a SSH host has changed its key, you can remove it with this command
+#
+
 
 ssh-keygen -R $1
-ssh-keygen -R $(dig A $1 +short)
-ssh-keygen -R $(dig AAAA $1 +short)
+for ip4 in $(dig A $1 +short) ; do 
+	ssh-keygen -R ${ip4}
+done
+for ip6 in $(dig AAAA $1 +short) ; do 
+	ssh-keygen -R ${ip6}
+done
