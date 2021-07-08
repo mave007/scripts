@@ -8,8 +8,8 @@ import matplotlib.cm as cm
 import yaml
 
 #fig = plt.figure(figsize=(8, 4.5))
-fig = plt.figure(figsize=(24, 13.5))
-#fig = plt.figure(figsize=(48, 27))
+#fig = plt.figure(figsize=(24, 13.5))
+fig = plt.figure(figsize=(48, 27))
 
 # llcrnrlat,llcrnrlon,urcrnrlat,urcrnrlon
 # are the lat/lon values of the lower left and upper right corners
@@ -33,6 +33,7 @@ m = Basemap(projection='robin',lon_0=0, resolution='l')
 
 # Draw gray continents. Fill lake with same color as water.
 #m.fillcontinents(color='#e9e9c9', lake_color='#b2d0ff', ax=None, zorder=None, alpha=None)
+m.fillcontinents(color='#CAAF5C', lake_color='#e7f3ff', ax=None, zorder=None, alpha=None)
 #m.fillcontinents(color='0.75', lake_color='white', ax=None, zorder=None, alpha=None)
 #m.fillcontinents(color='0.65', lake_color='#b2d0ff', ax=None, zorder=None, alpha=None)
 
@@ -40,8 +41,9 @@ m = Basemap(projection='robin',lon_0=0, resolution='l')
 #m.drawmapboundary(color='k', linewidth=0.1, fill_color=None, zorder=None, ax=None)
 
 # Draw relief (better than etopo), then we change water color
-m.shadedrelief()
-m.drawlsmask(ocean_color='#b2d0ff',land_color=(255,255,255,0.8))
+#m.shadedrelief()
+#m.drawlsmask(ocean_color='#b2d0ff',land_color=(255,255,255,0.8))
+m.drawlsmask(ocean_color='#e7f3ff',land_color=(255,255,255,0.8))
 
 # draw countries and boundaries
 m.drawcoastlines(linewidth=0.1, linestyle='solid', color='k', antialiased=True)
@@ -67,8 +69,9 @@ for instance in rawdata["Instances"]:
 x,y = m(lon,lat)
 
 # Higher zorder so it can be always on the top front layer.
-m.plot(x,y,'b8', markersize=8, zorder=20)
+m.plot(x,y,'b8', markersize=14, zorder=20)
 
 #plt.title("Root Servers Presence")
 plt.title("L-Root Server World Presence")
-plt.show()
+#plt.show()
+plt.savefig('world.png',dpi=144)

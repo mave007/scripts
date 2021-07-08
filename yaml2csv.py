@@ -16,7 +16,7 @@ with open(sys.argv[1], 'r') as stream:
 		if "dns" in k: VAL = str(v) + ";" + VAL
 		if "start-period" in k:
 			fecha=iso8601.parse_date(str(v))
-			VAL = str(fecha.isoformat()) + ";" + VAL
+			VAL = fecha.strftime("%F") + ";" + VAL
 		if "service" in k: VAL = str(v) + ";" + VAL
 			
 print KEY[:-1]
