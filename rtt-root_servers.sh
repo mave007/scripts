@@ -7,7 +7,7 @@
 export PATH=/usr/local/opt/coreutils/libexec/gnubin/:/usr/local/bin:/bin:/usr/bin:/usr/sbin
 
 QRY="CH TXT hostname.bind"
-FLAGS="+stats"
+FLAGS="+stats +retry=0 +timeout=1"
 IPV="4 6"
 
 function ColorRange(){
