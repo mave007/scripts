@@ -26,3 +26,40 @@ export P="\033[0m" # Neutral
 
 # Individual values can be accessed with printf:
 # printf "${C4}warning${P}"
+
+##### Helper Functions
+function PHeader() {
+    # PRINT HEADER. Receives 1 argument: Shows message
+    printf "##${C10} $* ${P}\n"
+}
+
+function PKey() {
+    # PRINT KEY. Receives 1 arguments: $1 (as key)
+    pad=30 # Number of spaces of right padding
+    printf "%s %b %-${pad}s %b" "#" "${C5}" "${1}" "${P}"
+}
+
+function PKeyValue() {
+    # PRINT KEY AND VALUE. Receives 3 arguments: $1 (as key) $2 (used as value) and $3 (optional: Type of special color)
+    padA=3
+    padB=6
+    if [ -z "${3}" ] ; then
+        printf "%b%-${padA}s %b%-${padB}s  %b" "${P}" "${1}:" "${C7}" "${2}" "${P}"
+    else
+        if [ "${3}" = "good" ] ; then
+            printf "%b%-${padA}s %b%-${padB}s  %b" "${P}" "${1}:" "${C13}" "${2}" "${P}"
+        else
+            printf "%b%-${padA}s %b%-${padB}s  %b" "${P}" "${1}:" "${C3}" "${2}" "${P}"
+        fi
+    fi
+}
+
+function PWarn(){
+    # PRINT WARNING. Prints Message. 1 Argument
+    printf "${P}#  ${C7}WARNING: $1${P}"
+}
+
+function PError(){
+	# PRINT ERROR. Prints Message error. 1 argument (To larger messages with spaces, must be called with colons)
+	printf "${P}#  ${C3}ERROR:${C4} $@ ${P}"
+}
