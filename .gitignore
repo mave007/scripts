@@ -1,0 +1,6 @@
+*.gpg
+*~
+.gitignore
+.DS_Store
+*.csv
+*.old
