@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import requests
 import json
-import gnupg
+import gnupg  # pip3 install python-gnupg
 
 # Initialize GPG object
 gpg = gnupg.GPG()
@@ -21,29 +21,38 @@ headers = {
            'Authorization': 'Bearer ' + TOKEN
 }
 
-def AddRR(dom,ip):
+def AddRR(rname,rtype,rdata,rttl=None,rweight=None,rpriority=None):
     """
     This function adds a Resource Record given string `dom` associated to string `ip`
     
     Parameters:
-    dom (str): FQDN
-    ip (str): Valid IPv4 Address
+    (req) rname (str): owner name (label)
+    (req) rtype (str): type of DNS Record (example: A, CNAME, TXT)
+    (req) rdata (str): a variable length string of octets that describes the resource. The format of this information varies according to the TYPE and CLASS of the resource record.
+    (opt) rttl (int): TTL of the record
+    (opt) rweight (int): weight for SRV records
+    (opt) rpriority (int): priority of SRV or MX records
+
     
     Returns: 
     None
     """
     
     data = {
-            'name': dom,
-            'ip_address': ip,
+            'name': rname,
+            'type': rtype,
+            'data': rdata,
+            'ttl': rttl,
+            'weight': rweight,
+            'priority': rpriority,
     }
     
     url = 'https://api.digitalocean.com/v2/domains'
     response = requests.post(url, headers=headers, data=json.dumps(data))
     if response.status_code == 201:
-        print(f'Successfully created domain {dom}')
+        print(f'Successfully created domain {rname} {rtype} {rdata}')
     else:
-        print(f'Error creating domain {dom}: {response.status_code} {response.reason}')
+        print(f'Error creating domain {rname}: {response.status_code} {response.reason}')
 
 def ListRR():
     """ 
@@ -82,6 +91,9 @@ def DelRR(dom):
         print(f"Failed to delete the domain {domain_name}. Error {response.status_code}: {response.json()['message']}")
 
 
-AddRR("sfo.test.do.cero32.cl",'143.198.73.162')
-DelRR("nyc.test.do.cero32.cl")
-AddRR("nyc.test.do.cero32.cl",'138.197.4.218')
+#AddRR("sfo.test.do.cero32.cl",'143.198.73.162')
+#DelRR("nyc.test.do.cero32.cl")
+#AddRR("nyc.test.do.cero32.cl",'138.197.4.218')
+
+AddRR('nyc.test.do.cero32.cl', 'TXT', ' test')
+ListRR
