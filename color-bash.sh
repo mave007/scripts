@@ -20,12 +20,8 @@ for bg in $(seq 40 47); do
 		for fg in $(seq 30 37); do
 			# Text color codes: 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
 			case ${attrib} in
-				0)
-				echo -en "\033[${bg}m\033[${fg}m [${fg}m  "
-				;;
-				*)
-				echo -en "\033[${bg}m\033[${attrib};${fg}m [${attrib};${fg}m"
-				;;
+				0) echo -en "\033[${bg}m\033[${fg}m [${fg}m  " ;;
+				*) echo -en "\033[${bg}m\033[${attrib};${fg}m [${attrib};${fg}m" ;;
 			esac
 		done
 		echo -e " \033[0m"
