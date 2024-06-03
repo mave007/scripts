@@ -37,19 +37,24 @@ regexp=@?([a-zA-Z0-9_]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}\.?
 colours=magenta
 count=more
 =======
+# TLD
+regexp=[a-zA-Z_]{2,61}\.
+colours=magenta
+count=more
+=======
 # commented flags values
 regexp=:\s(\w*)(\,|;|$)
-colours=default, yellow
+colours="\033[3;33m"
 count=more
 =======
 # commented flags values 2
 regexp=:\s?+(\w+)(;|\s\(.*\))
-colours=yellow
+colours="\033[3;33m"
 count=more
 =======
 # commented flags values 3
 regexp=:(\s?+(\w+))+
-colours=yellow
+colours="\033[3;33m"
 count=more
 =======
 # cmd options
@@ -59,22 +64,32 @@ count=more
 =======
 # DNSSEC comments
 regexp=\s;\s(\w+);
-colours=yellow
+colours="\033[1;34m"
 count=more
 =======
 # DNSSEC comments values 2
 regexp=\=\s(\w+)(\s;|$)
-colours="\033[33m"
+colours="\033[3;33m"
 count=more
 =======
 # DNSSEC expiration inception
 regexp=\s([0-9]{11,14})
-colours="\033[1;34m"
+colours="\033[1;3;34m"
 count=more
 =======
 # EDE comments
 regexp=(\s)EDE(:)
-colours=blink red, default
+colours=red
+count=more
+=======
+# More prominent status
+regexp=:\s(REFUSED|NXDOMAIN|SERVFAIL|NOTIMP|SERVFAIL)
+colours=red
+count=more
+=======
+# Cleanup bad matches in comments
+regexp=(^;;\sOPT\s|:|,|;|\d+\sdays|\d+\sminutes|\d+\shours)
+colours="\033[1;3;30m"
 count=more
 =======
 # IPv4 Address
@@ -86,4 +101,3 @@ count=more
 regexp=(([0-9a-fA-F]{1,4})?\:\:?[0-9a-fA-F]{1,4})+
 colours=green
 count=more
-
