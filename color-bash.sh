@@ -15,7 +15,7 @@ echo "------------------------------------------------------------------------"
 for bg in $(seq 40 47); do
 	# Background color codes: 40=black 41=red 42=green 43=yellow 44=blue 45=magenta 46=cyan 47=white
 	for attrib in 0 1 4 5; do
-		# Attrib codes: 0=none 1=bold 4=underscore 5=blink 7=reverse 8=concealed (reverse and concealed ommited on purpose)
+		# Attrib codes: 0=none 1=bold 2=light 3=italics 4=undline 5=blink 7=reverse 8=concealed 9=strikethrough 
         echo -en "\033[0m|  ESC[${bg}m   | "
 		for fg in $(seq 30 37); do
 			# Text color codes: 30=black 31=red 32=green 33=yellow 34=blue 35=magenta 36=cyan 37=white
@@ -29,7 +29,7 @@ for bg in $(seq 40 47); do
 	echo "------------------------------------------------------------------------ "
 done
 
-echo "Note that Attributes can be combined and separated by ';' example for red background, ligth dark, underscored and blinking:"
-echo -e "\033[41m\033[1;5;4;30m example (ESC[41mESC[1;4;5;30m)\033[0m "
+echo "Note that Attributes can be combined and separated by ';' example for red background, bold, italics, underline, blinking, strikedthrough and yellow color:"
+echo -e "\033[41m\033[1;3;4;5;9;33m example (ESC[41mESC[1;3;4;5;9;33m)\033[0m "
 echo
 echo
