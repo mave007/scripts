@@ -5,12 +5,12 @@
 
 # comments
 regexp=;(\s?)\w*\s*\w*.*
-colours="\033[1;30m"
+colours="\033[1;3;30m"
 count=more
 =======
 # comments 2
 regexp=;;\s\w*\s*\w*.*
-colours="\033[1;30m"
+colours="\033[1;3;30m"
 count=more
 =======
 # DIG version
