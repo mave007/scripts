@@ -1,0 +1,89 @@
+########################################################################
+# DIG Config for Generic Colouriser (https://github.com/garabik/grc) 
+# source: https://github.com/mave007/scripts/tree/master/grc
+########################################################################
+
+# comments
+regexp=;(\s?)\w*\s*\w*.*
+colours="\033[1;30m"
+count=more
+=======
+# comments 2
+regexp=;;\s\w*\s*\w*.*
+colours="\033[1;30m"
+count=more
+=======
+# DIG version
+regexp=<<>> DiG.* <<>> (\S+)
+colours=default,bold magenta
+=======
+# TTL and numeric values
+regexp=\s[0-9]{1,10}\s
+colours=red
+count=more
+=======
+# RR type
+regexp=(A|AAAA|AFSDB|APL|CAA|CDNSKEY|CDS|CERT|CNAME|CSYNC|DHCID|DLV|DNAME|DNSKEY|DS|EUI48|EUI64|HINFO|HIP|HTTPS|IPSECKEY|KEY|KX|LOC|MX|NAPTR|NS|NSEC|NSEC3|NSEC3PARAM|OPENPGPKEY|PTR|RP|RRSIG|SIG|SMIMEA|SOA|SPF|SRV|SSHFP|SVCB|TA|TKEY|TLSA|TSIG|TXT|URI|ZONEMD|AXFR|IXFR|OPT|ANY)(\s|$)
+colours=cyan
+count=more
+=======
+# CH IN
+regexp=\s(IN|CH)\s
+colours=yellow
+count=more
+=======
+# FQDN
+regexp=@?([a-zA-Z0-9_]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}\.?
+colours=magenta
+count=more
+=======
+# commented flags values
+regexp=:\s(\w*)(\,|;|$)
+colours=default, yellow
+count=more
+=======
+# commented flags values 2
+regexp=:\s?+(\w+)(;|\s\(.*\))
+colours=yellow
+count=more
+=======
+# commented flags values 3
+regexp=:(\s?+(\w+))+
+colours=yellow
+count=more
+=======
+# cmd options
+regexp=\+\w+(\s|$)
+colours=default
+count=more
+=======
+# DNSSEC comments
+regexp=\s;\s(\w+);
+colours=yellow
+count=more
+=======
+# DNSSEC comments values 2
+regexp=\=\s(\w+)(\s;|$)
+colours="\033[33m"
+count=more
+=======
+# DNSSEC expiration inception
+regexp=\s([0-9]{11,14})
+colours="\033[1;34m"
+count=more
+=======
+# EDE comments
+regexp=(\s)EDE(:)
+colours=blink red, default
+count=more
+=======
+# IPv4 Address
+regexp=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}
+colours=green
+count=more
+=======
+# IPv6 Address
+regexp=(([0-9a-fA-F]{1,4})?\:\:?[0-9a-fA-F]{1,4})+
+colours=green
+count=more
+
