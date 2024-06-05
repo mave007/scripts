@@ -14,7 +14,7 @@ colours="\033[1;3;30m"
 count=more
 =======
 # DIG version
-regexp=<<>> DiG.* <<>> (\S+)
+regexp=<<>> DiG.* <<>> (\s+)
 colours=default,bold magenta
 =======
 # TTL and numeric values
@@ -43,17 +43,7 @@ colours=magenta
 count=more
 =======
 # commented flags values
-regexp=:\s(\w*)(\,|;|$)
-colours="\033[3;33m"
-count=more
-=======
-# commented flags values 2
-regexp=:\s?+(\w+)(;|\s\(.*\))
-colours="\033[3;33m"
-count=more
-=======
-# commented flags values 3
-regexp=:(\s?+(\w+))+
+regexp=:\s([a-zA-Z0-9\s\)\(])+(\,|;|$)
 colours="\033[3;33m"
 count=more
 =======
