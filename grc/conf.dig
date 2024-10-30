@@ -14,8 +14,8 @@ colours="\033[1;3;30m"
 count=more
 =======
 # DIG version
-regexp=<<>> DiG.* <<>> (\s+)
-colours=default,bold magenta
+regexp=<<>>\s(DiG.*)\s<<>>
+colours=default,yellow
 =======
 # TTL and numeric values
 regexp=\s[0-9]{1,10}\s
@@ -68,7 +68,7 @@ colours="\033[1;3;34m"
 count=more
 =======
 # EDE comments
-regexp=(\s)EDE(:)
+regexp=(\s)EDE(:)\s\d+
 colours=red
 count=more
 =======
