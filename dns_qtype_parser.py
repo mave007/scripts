@@ -5,6 +5,11 @@ Optimized for large files with minimal overhead.
 IANA DNS RR TYPEs per RFC 6895, RFC 1035
 """
 
+# Extract QNAME and QTYPE with tshark with:
+# 
+# for i in *.pcap ; do tshark -r $i -Y "udp.dstport == 53" -T fields -e dns.qry.name -e dns.qry.type >> queries_temp.txt; done
+#
+
 import sys
 from typing import TextIO
 
