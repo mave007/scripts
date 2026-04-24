@@ -11,6 +11,9 @@
 import sys
 import argparse
 import qrcode
+import warnings
+import platform
+from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 from qrcode.image.styledpil import StyledPilImage
@@ -82,70 +85,110 @@ def list_modes():
     sys.exit(0)
 
 
-
-def add_text_below(image: Image.Image, text: str, text_color: tuple):
+def load_font_by_family(family: str, size: int):
     """
-    Add bold, width-dominant, auto-scaled text below a QR code.
-    Text attempts to visually fill the QR width.
-    Uses the same color used in the QR code fill    
+    Load a font by family name with OS-aware resolution.
+    No warning unless everything fails.
+    """
+    system = platform.system()
+
+    macos_fonts = {
+        "default": "/System/Library/Fonts/Supplemental/Verdana.ttf",
+        "arial": "/System/Library/Fonts/Supplemental/Arial.ttf",
+        "verdana": "/System/Library/Fonts/Supplemental/Verdana.ttf",
+        "trebuchet": "/System/Library/Fonts/Supplemental/Trebuchet MS.ttf",
+        "helvetica": "/System/Library/Fonts/Helvetica.ttc",
+    }
+
+    try:
+        if system == "Darwin":
+            path = macos_fonts.get(family.lower(), macos_fonts["default"])
+            if Path(path).exists():
+                return ImageFont.truetype(path, size)
+            raise OSError(f"Font file not found: {path}")
+
+        # Linux / Windows
+        return ImageFont.truetype(family, size)
+
+    except Exception as e:
+        if not getattr(load_font_by_family, "_warned", False):
+            warnings.warn(
+                f"⚠️  Could not load font '{family}'. "
+                f"Falling back to default font. Reason: {e}"
+            )
+            load_font_by_family._warned = True
+
+        return ImageFont.load_default()
+
+
+def add_text_below(
+    image: Image.Image,
+    text: str,
+    text_color: tuple,
+    qr_margin_px: int,
+    font_family: str = "default",
+):
+    """
+    Add auto-scaled text below a QR code using the same quiet-zone margin.
+    Text is scaled to visually match QR width.
     """
     qr_width, qr_height = image.size
 
-    padding = int(qr_height * 0.06)
-    min_font_size = 12
-    max_font_size = int(qr_width * 0.25)   # Aggressive starting size
-    target_width_ratio = 0.90              # Desired width usage
-    max_height_ratio = 0.18                # Safety cap
+    top_padding = qr_margin_px
+    bottom_padding = qr_margin_px
 
     draw = ImageDraw.Draw(image)
 
-    # Load font
-    try:
-        font_path = "DejaVuSans.ttf"
-        font = ImageFont.truetype(font_path, max_font_size)
-    except IOError:
-        font = ImageFont.load_default()
-        max_font_size = getattr(font, "size", 14)
+    min_font_size = 12
+    max_font_size = int(qr_width * 0.30)
+    target_width_ratio = 0.90
+    max_height_ratio = 0.20
 
+    # ✅ Ensure font is always defined
     font_size = max_font_size
+    font = load_font_by_family(font_family, font_size)
 
-    # Shrink until width target AND height safety are satisfied
     while font_size >= min_font_size:
-        try:
-            font = ImageFont.truetype(font_path, font_size)
-        except IOError:
-            font = ImageFont.load_default()
+        font = load_font_by_family(font_family, font_size)
 
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
 
-        width_ok = text_width <= qr_width * target_width_ratio
-        height_ok = text_height <= qr_height * max_height_ratio
-
-        if width_ok and height_ok:
+        if (
+            text_width <= qr_width * target_width_ratio
+            and text_height <= qr_height * max_height_ratio
+        ):
             break
 
         font_size -= 1
 
-    # Final metrics
+    # Final measurement
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
 
-    new_height = qr_height + text_height + padding
-    new_img = Image.new("RGB", (qr_width, new_height), "white")
+    new_height = qr_height + top_padding + text_height + bottom_padding
+
+    new_img = Image.new(
+        "RGB",
+        (qr_width, new_height),
+        "white",
+    )
+
     new_img.paste(image, (0, 0))
 
     draw = ImageDraw.Draw(new_img)
+
     draw.text(
-        ((qr_width - text_width) // 2, qr_height + padding // 2),
+        ((qr_width - text_width) // 2, qr_height + top_padding),
         text,
         fill=text_color,
         font=font,
     )
 
     return new_img
+
 
 
 def relative_luminance(rgb):
@@ -182,21 +225,25 @@ def check_contrast(front, back, min_ratio=4.5):
         )
 
 
-
 def generate_qr(url, fill_rgb, back_rgb, mode, text, output):
     try:
         drawer_class = MODULE_DRAWERS.get(mode)
         if not drawer_class:
             raise ValueError(f"Unknown mode '{mode}'. Use --list to see options.")
-        
-        # Print Warning if contrast is not good enough
+
+        # QR layout parameters
+        box_size = 10
+        border = 4
+        qr_margin_px = box_size * border
+
+        # Contrast safety check
         check_contrast(fill_rgb, back_rgb)
 
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_H,
-            box_size=10,
-            border=4,
+            box_size=box_size,
+            border=border,
         )
 
         qr.add_data(url)
@@ -211,8 +258,14 @@ def generate_qr(url, fill_rgb, back_rgb, mode, text, output):
             ),
         ).convert("RGB")
 
+        # Append text with margin-aware layout
         if text:
-            img = add_text_below(img, text, fill_rgb)
+            img = add_text_below(
+                image=img,
+                text=text,
+                text_color=fill_rgb,
+                qr_margin_px=qr_margin_px,
+            )
 
         img.save(output)
         print(f"✅ QR code generated successfully: {output}")
