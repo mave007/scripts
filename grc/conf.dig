@@ -1,6 +1,16 @@
 ########################################################################
 # DIG Config for Generic Colouriser (https://github.com/garabik/grc) 
 # source: https://github.com/mave007/scripts/tree/master/grc
+#
+# macos install:
+# brew install grc
+# mkdir ~/.grc && cd ~/.grc
+# wget https://raw.githubusercontent.com/mave007/scripts/refs/heads/master/grc/conf.dig
+#
+# #Add the following to your ~/.bash_profile
+# export COLORTERM=truecolor
+# GRC_ALIASES=true
+# [ -e "${BREWPREFIX}/etc/grc.sh" ] && source "${BREWPREFIX}/etc/grc.sh"
 ########################################################################
 
 # comments
